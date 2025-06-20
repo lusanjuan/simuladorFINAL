@@ -6,14 +6,32 @@
   <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
   <style>
     body { background: #0d1c2c; color: #fff; font-family: 'Segoe UI', sans-serif; }
-    .controls { max-width: 800px; margin: 0 auto 10px auto; background: #102237; border-radius: 10px; padding: 1em; }
+    .block-container { padding-left: 1rem; padding-right: 1rem; max-width: 80% !important; }
+    .stApp { background-color: #0d1c2c; }
+    h1, h2, h3, label, .stMarkdown, .css-qrbaxs { color: #ffffff !important; font-family: 'Segoe UI', sans-serif; }
+    .main-flex { display: flex; flex-direction: row; justify-content: center; align-items: flex-start; max-width: 1200px; margin: 0 auto; gap: 2rem; }
+    .controls-col { flex: 1; min-width: 260px; max-width: 340px; }
+    .controls { background: #102237; border-radius: 10px; padding: 1em; margin-bottom: 1em; }
     .controls label { font-weight: bold; color: #fff; }
-    .legend { margin: 1em auto; max-width: 800px; }
+    .legend { margin: 1em auto; max-width: 80%; }
     .legend span { margin-right: 1.5em; font-size: 1.1em; }
-    .btn { background: #102237; color: #e8e8ea; border: 1px solid #445; border-radius: 8px; font-weight: bold; padding: 0.5em 1em; cursor: pointer; }
-    .btn:hover { background: #334a69; color: #fff; }
+    .btn { background: #102237; color: #e8e8ea !important; border: 1px solid #445; border-radius: 8px; font-weight: bold; padding: 0.5em 1em; cursor: pointer; }
+    .btn:hover { background: #334a69; color: #fff !important; }
     h1, h2, h3 { color: #fff; }
-    .teoria { max-width: 800px; margin: 0 auto 1em auto; background: #102237; border-radius: 10px; padding: 1em; }
+    .teoria { max-width: 80%; margin: 0 auto 1em auto; background: #102237; border-radius: 10px; padding: 1em; }
+    .stSlider { background-color: #102237; padding: 1rem; border: 1px solid #445; border-radius: 10px; margin-bottom: 1rem; }
+    .stSlider label { color: #ffffff !important; font-weight: bold; }
+    input[type=range]::-webkit-slider-thumb { background: #00e6ff; }
+    input[type=range]::-moz-range-thumb { background: #00e6ff; }
+    input[type=range]::-ms-thumb { background: #00e6ff; }
+    input[type=range] { accent-color: #00e6ff; }
+    .right-col { flex: 2; min-width: 400px; display: flex; flex-direction: column; align-items: center; }
+    #sketch-holder { width: 800px; height: 400px; display: flex; justify-content: center; align-items: center; margin-bottom: 1.5em; }
+    #iv-curve { width: 400px; margin: 0 auto; }
+    @media (max-width: 1000px) {
+      .main-flex { flex-direction: column; align-items: stretch; }
+      .right-col, #sketch-holder, #iv-curve { width: 100% !important; min-width: 0; }
+    }
   </style>
 </head>
 <body>
@@ -37,30 +55,38 @@
       <li>Cada transición se acompaña de la emisión de un fotón&nbsp;UV; aquí lo representamos como un destello rápido.</li>
     </ul>
   </div>
-  <div class="controls">
-    <label>Potencial de excitación (eV): <span id="pot_excitacion_val">4.9</span></label>
-    <input type="range" id="pot_excitacion" min="0.1" max="20" step="0.1" value="4.9"><br>
-    <label>Voltaje de aceleración (V): <span id="voltaje_max_val">8.0</span></label>
-    <input type="range" id="voltaje_max" min="0" max="50" step="0.1" value="8.0"><br>
-    <label>Voltaje de frenado (V): <span id="voltaje_frenado_val">1.0</span></label>
-    <input type="range" id="voltaje_frenado" min="0" max="10" step="0.1" value="1.0"><br>
-    <label>Temperatura del filamento (K): <span id="temp_filamento_val">2000</span></label>
-    <input type="range" id="temp_filamento" min="1000" max="3000" step="100" value="2000"><br>
-    <span id="flujo"></span>
-    <button class="btn" id="startBtn">▶️ Comenzar</button>
-    <button class="btn" id="stopBtn">⏹️ Detener</button>
+  <div class="main-flex">
+    <div class="controls-col">
+      <div class="controls stSlider">
+        <label>Potencial de excitación (eV): <span id="pot_excitacion_val">4.9</span></label>
+        <input type="range" id="pot_excitacion" min="0.1" max="20" step="0.1" value="4.9"><br>
+        <label>Voltaje de aceleración (V): <span id="voltaje_max_val">8.0</span></label>
+        <input type="range" id="voltaje_max" min="0" max="50" step="0.1" value="8.0"><br>
+        <label>Voltaje de frenado (V): <span id="voltaje_frenado_val">1.0</span></label>
+        <input type="range" id="voltaje_frenado" min="0" max="10" step="0.1" value="1.0"><br>
+        <label>Temperatura del filamento (K): <span id="temp_filamento_val">2000</span></label>
+        <input type="range" id="temp_filamento" min="1000" max="3000" step="100" value="2000"><br>
+        <span id="flujo"></span>
+        <div style="display:flex; gap:1em; margin-top:1em;">
+          <button class="btn" id="startBtn">▶️ Comenzar</button>
+          <button class="btn" id="stopBtn">⏹️ Detener</button>
+        </div>
+      </div>
+    </div>
+    <div class="right-col">
+      <div id="sketch-holder"></div>
+      <div id="iv-curve"></div>
+    </div>
   </div>
-  <div id="sketch-holder" style="display:flex;justify-content:center;"></div>
   <div class="legend">
-    <span style="color:#ffaa00">●</span> fundamental (n=1)
-    <span style="color:#ff4444">●</span> n=2
-    <span style="color:#bb88ff">●</span> n=3
-    <span style="color:#ffffff">●</span> fotón emitido cuando el átomo se desexcita
-    <span style="color:#ffa64d">●</span> filamento
-    <span style="color:#b0b0b0">●</span> cátodo
-    <span style="color:#2ecc71">●</span> ánodo
+    <span style="color:#ffaa00">●</span> fundamental (n=1)&nbsp;&nbsp;
+    <span style="color:#ff4444">●</span> n=2&nbsp;&nbsp;
+    <span style="color:#bb88ff">●</span> n=3&nbsp;&nbsp;
+    <span style="color:#ffffff">●</span> fotón emitido cuando el átomo se desexcita&nbsp;&nbsp;  
+    <span style="color:#ffa64d">●</span> filamento&nbsp;&nbsp; 
+    <span style="color:#b0b0b0">●</span> cátodo&nbsp;&nbsp; 
+    <span style="color:#2ecc71">●</span> ánodo&nbsp;&nbsp;   
   </div>
-  <div class="legend" id="iv-curve"></div>
   <script>
     // Parámetros iniciales
     let pot_excitacion = 4.9;
